@@ -5,11 +5,6 @@
 
 namespace ngl
 {
-    const std::string& shape_cluster::name() const { return name_; }
-    std::vector<ngl::shape_data>& shape_cluster::datas() { return shape_datas_; }
-    uint64_t shape_cluster::scalar_shapes_count() const { return scalar_shapes_; }
-    uint64_t shape_cluster::vector_shapes_count() const { return vector_shapes_; }
-
     void shape_cluster::display() const
     {
         for (int i = 0; i < shape_datas_.size(); ++i)
@@ -143,7 +138,7 @@ namespace ngl
         auto left_curly_brace   = add(ngl::shape_element('{'));
         auto right_curly_brace  = add(ngl::shape_element('}'));
 
-        auto newline            = add(ngl::shape_element('\n'));
+        auto newline            = add(ngl::shape_space('\n'));
         auto space              = add(ngl::shape_space(' '));
         auto tab                = add(ngl::shape_space('\t'));
         auto whitespace         = add(ngl::shape_or(space, tab, newline));
@@ -157,6 +152,7 @@ namespace ngl
         auto digits             = add(ngl::shape_many(digit));
 
         auto identifier_symbol  = add(ngl::shape_or(letter, digit, underscore));
-        auto raw_identifier     = add(ngl::shape_many(identifier_symbol));
+        auto identifier_symbols  = add(ngl::shape_many(identifier_symbol));
+        auto raw_identifier     = add(ngl::shape_sequence(letter, identifier_symbol));
     }
 } // ngl

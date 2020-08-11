@@ -64,6 +64,32 @@ TEST(lexer, vector_many)
     LX_EXPECT("ngl", "00", "_");
 }
 
+TEST(lexer, vector_sequence_scalar)
+{
+    ngl::shape_cluster shapes;
+    auto letter = shapes.add(ngl::shape_range('a', 'z'));
+    auto digit = shapes.add(ngl::shape_range('0', '9'));
+    auto underscore = shapes.add(ngl::shape_element('_'));
+
+    auto seq = shapes.add(ngl::shape_sequence(letter, underscore, digit));
+
+    ngl::lexer lx{ shapes };
+
+    std::string data { "n_0" };
+    lx.process(data);
+    LX_EXPECT("n_0");
+
+    // partial sequence false
+    data = "a_n_0";
+    lx.process(data);
+    LX_EXPECT("a", "_", "n_0");
+
+    // circular
+    data = "n_0n_0";
+    lx.process(data);
+    LX_EXPECT("n_0", "n_0");
+}
+
 TEST(lexer, vector_sequence)
 {
     ngl::shape_cluster shapes;
@@ -72,6 +98,7 @@ TEST(lexer, vector_sequence)
     auto underscore = shapes.add(ngl::shape_element('_'));
     auto identifier_symbol = shapes.add(ngl::shape_or(letter, underscore));
     auto many_identifier_symbol = shapes.add(ngl::shape_many(identifier_symbol));
+
     auto identifier = shapes.add(ngl::shape_sequence(underscore, many_identifier_symbol, underscore));
 
     ngl::lexer lx{ shapes };
@@ -94,6 +121,9 @@ TEST(lexer, vector_sequence)
     LX_EXPECT("_ngl_", "_ngl_");
 
     // _, n,
+    data = "_ngl__ngl_";
+    lx.process(data);
+    LX_EXPECT("_ngl_", "_ngl_");
 }
 
 

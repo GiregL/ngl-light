@@ -41,12 +41,13 @@ namespace ngl
             size_t space = 0;
 
             if (shape_clusters_.empty()) ngl_error("Lexer requires at least 1 shape_cluster");
-            auto& shape_data = shape_clusters_[0].get().datas();
-            auto scalar_shapes_count = shape_clusters_[0].get().scalar_shapes_count();
+            auto& shape_cluster = shape_clusters_[0].get();
+            auto& shape_data = shape_cluster.datas();
+            auto scalar_shapes_count = shape_cluster.scalar_shapes_count();
 
-            uint64_t parser_state = shape_clusters_[0].get().parser_shape_state_;
+            uint64_t parser_state = shape_cluster.parser_shape_state_;
 
-            std::cout << "\n" << std::bitset<32>(shape_clusters_[0].get().parser_shape_state_) << "\n";
+            std::cout << "\n" << std::bitset<32>(shape_cluster.parser_shape_state_) << "\n";
 
 
             for (i = 0; i < data_.size(); ++i)
@@ -62,7 +63,7 @@ namespace ngl
                     auto& shape = shape_data[shape_it];
                     bool match = false;
 
-                    std::cout << "\n" << shape_it << " " << shape_data[shape_it].name << " ";
+                    //std::cout << "\n" << shape_it << " " << shape_data[shape_it].name << " ";
 
                     switch (static_cast<shape_type>(shape.type))
                     {
@@ -125,36 +126,49 @@ namespace ngl
                         auto ar = reinterpret_cast<std::vector<uint64_t>*>(shape.data);
                         auto sequence_size = ar->size();
 
+                        std::cout << " I: " << shape.vector_index
+                          << " M: " << match;
+
+                        // end of sequence
+                        if (shape.vector_index == sequence_size)
+                        {
+                            match = false;
+                            shape_state[shape.index] = false;
+                            shape.vector_index = 0;
+                            break;
+                        }
+
+                        // current shape in the sequence
                         auto shape_index = ar->operator[](shape.vector_index);
                         auto next_shape_index = -1;
+                        // get the next shape index if it exists
                         if (shape.vector_index + 1 < sequence_size) next_shape_index = reinterpret_cast<std::vector<uint64_t>*>(shape.data)->operator[](shape.vector_index + 1);
 
                         bool pmatch = previous_state[shape.index];
                         bool index_match = shape_state[shape_index];
+                        bool next_match = (next_shape_index != -1) && shape_state[next_shape_index];
 
-                        if (!index_match && pmatch && next_shape_index != -1)
+                        //std::cout << " NM: " << next_match;
+
+                        if (shape.vector_index <= sequence_size && !next_match)
                         {
-                            index_match = shape_state[next_shape_index];
-                            shape.vector_index += index_match;
+                            //shape.vector_index = 0;
+
+                        }
+
+
+                        // next shape in the sequence
+                        if (index_match)
+                        {
+                            // if matching shape is scalar, go to the next shape index in the sequence
+                            if (shape_cluster.is_scalar(shape_index)) shape.vector_index++;
                         }
 
                         match = index_match;
                         shape_state[shape.index] = match;
 
                         if (match) vector_state |= shape.vector_id;
-                        // not matching anymore
-                        if (!match && shape.vector_index + 1 == sequence_size)
-                        {
-                            // prepare for next increment
-                            shape.vector_index = ~uint64_t(0);
-                        }
-
-                        shape.vector_index = (shape.vector_index + (!index_match & pmatch));
-
-                        std::cout << " I: " << shape.vector_index
-                          << " PM: " << pmatch
-                          << " IM: " << index_match
-                          << " M: " << match;
+                        //else shape.vector_index = 0;
 
                         break;
                     }

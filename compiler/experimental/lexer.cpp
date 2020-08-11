@@ -5,22 +5,58 @@ int main()
 {
     try
     {
-
-        ngl::shape_cluster parser_shapes;
+        ngl::shape_cluster seq;
         ngl::shape_cluster shapes;
-        auto letter = shapes.add(ngl::shape_element('n'));
-        auto digit = shapes.add(ngl::shape_element('0'));
+        auto letter = shapes.add(ngl::shape_range('a', 'z'));
+        auto digit = shapes.add(ngl::shape_range('0', '9'));
         auto underscore = shapes.add(ngl::shape_element('_'));
+        auto underscores = shapes.add(ngl::shape_many(underscore));
 
+        auto letters = shapes.add(ngl::shape_many(letter));
         auto digits = shapes.add(ngl::shape_many(digit));
 
-        auto seq = shapes.add(ngl::shape_sequence(letter, underscore, underscore));
+        auto s = shapes.add(ngl::shape_sequence(letter, underscore, digit));
+        // n_0 true
+        // n___0 false
+
+        //auto seq = shapes.add(ngl::shape_sequence(letter, many_underscore, digit));
+
+        //auto seq = shapes.add(ngl::shape_sequence(letter, underscore, digits));
+
+        auto A = seq.add(ngl::shape_element('a'));
+        auto B = seq.add(ngl::shape_element('b'));
+        auto C = seq.add(ngl::shape_element('c'));
+        auto zero = seq.add(ngl::shape_element('0'));
+        seq.add(ngl::shape_sequence(A, B, C));
 
 
-        ngl::lexer lx{ shapes };
+        ngl::lexer lx{ seq };
 
-        //std::string data = "n_0n_000"; n_0, n_0
-        std::string data = "n__nn"; // n, _, _
+        //std::string data = "n__0n_000"; // n_0, n_0 // circular
+        //std::string data = "n__nn"; // n, _, _
+        //std::string data = "n_0az_n_0az";
+        std::string data = "ab0";
+        // n_0 az _ n_0 az
+
+        /*
+        seq< "abcd", "0">
+
+        <a, b, c, d>
+        101000
+        100100
+        100010
+        0000001
+        abc0
+
+        (abcd) a b c 0
+
+        0 001000
+        0 000100
+        0 000010
+        0 000001
+        1 0000001
+        abcd*/
+
 
         shapes.display();
         lx.process(data);
