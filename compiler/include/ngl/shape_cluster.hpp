@@ -48,8 +48,6 @@ namespace ngl
         uint64_t scalar_shapes_ = 0;
         uint64_t vector_shapes_ = 0;
         uint64_t shape_data_index_ = 0;
-
-
     };
 
 
