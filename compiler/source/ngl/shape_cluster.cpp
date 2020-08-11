@@ -5,6 +5,11 @@
 
 namespace ngl
 {
+    const std::string& shape_cluster::name() const { return name_; }
+    std::vector<ngl::shape_data>& shape_cluster::datas() { return shape_datas_; }
+    uint64_t shape_cluster::scalar_shapes_count() const { return scalar_shapes_; }
+    uint64_t shape_cluster::vector_shapes_count() const { return vector_shapes_; }
+
     void shape_cluster::display() const
     {
         for (int i = 0; i < shape_datas_.size(); ++i)
@@ -122,5 +127,36 @@ namespace ngl
     bool shape_cluster::is_scalar(uint64_t shape_index) const
     {
         return shape_index < scalar_shapes_count();
+    }
+
+    // ngl_shape_cluster
+
+    ngl_shape_cluster::ngl_shape_cluster() : shape_cluster("ngl_shape_cluster")
+    {
+        // Adding basic grammar of ngl
+        auto left_chevron       = add(ngl::shape_element('<'));
+        auto right_chevron      = add(ngl::shape_element('>'));
+        auto left_brace         = add(ngl::shape_element('['));
+        auto right_brace        = add(ngl::shape_element(']'));
+        auto underscore         = add(ngl::shape_element('_'));
+        auto edge               = add(ngl::shape_element(':'));
+        auto left_curly_brace   = add(ngl::shape_element('{'));
+        auto right_curly_brace  = add(ngl::shape_element('}'));
+
+        auto newline            = add(ngl::shape_element('\n'));
+        auto space              = add(ngl::shape_space(' '));
+        auto tab                = add(ngl::shape_space('\t'));
+        auto whitespace         = add(ngl::shape_or(space, tab, newline));
+        auto whitespaces        = add(ngl::shape_many(whitespace));
+
+        auto minus_letter       = add(ngl::shape_range('a', 'z'));
+        auto maj_letter         = add(ngl::shape_range('A', 'Z'));
+        auto letter             = add(ngl::shape_or(minus_letter, maj_letter));
+
+        auto digit              = add(ngl::shape_range('0', '9'));
+        auto digits             = add(ngl::shape_many(digit));
+
+        auto identifier_symbol  = add(ngl::shape_or(letter, digit, underscore));
+        auto raw_identifier     = add(ngl::shape_many(identifier_symbol));
     }
 } // ngl

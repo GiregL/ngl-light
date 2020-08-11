@@ -50,9 +50,15 @@ namespace ngl
         uint64_t scalar_shapes_ = 0;
         uint64_t vector_shapes_ = 0;
         uint64_t shape_data_index_ = 0;
-
-
     };
+
+
+    class ngl_shape_cluster : public shape_cluster
+    {
+    public:
+        explicit ngl_shape_cluster();
+    };
+
 } // ngl
 
 #endif // COMPILER_INCLUDE_NGL_SHAPE_CLUSTER_HPP_NGL
