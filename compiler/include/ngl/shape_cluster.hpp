@@ -35,6 +35,8 @@ namespace ngl
         ngl::shape_data add(ngl::shape_sequence, const std::string& name = "shape_sequence", bool is_parser = false);
         ngl::shape_data add(ngl::shape_space space, const std::string& name = "shape_space", bool is_parser = false);
 
+        bool is_scalar(uint64_t shape_index) const;
+
         uint64_t scalar_shapes_count() const;
         uint64_t vector_shapes_count() const;
 
