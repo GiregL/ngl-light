@@ -53,7 +53,7 @@ target_compile_definitions(lib_llvm INTERFACE ${LLVM_DEFINITIONS})
 target_link_directories(lib_llvm INTERFACE ${LLVM_PATH}/lib)
 llvm_map_components_to_libnames(llvm_libs
         x86asmparser x86codegen x86desc x86disassembler x86info x86utils
-        codegen core native nativecodegen)
+        codegen core native nativecodegen support)
 target_link_libraries(lib_llvm INTERFACE ${llvm_libs})
 
 # lib_nds

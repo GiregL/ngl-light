@@ -51,6 +51,14 @@ namespace ngl
 
 
     };
+
+
+    class ngl_shape_cluster : public shape_cluster
+    {
+    public:
+        explicit ngl_shape_cluster();
+    };
+
 } // ngl
 
 #endif // COMPILER_INCLUDE_NGL_SHAPE_CLUSTER_HPP_NGL

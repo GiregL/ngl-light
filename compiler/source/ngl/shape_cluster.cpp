@@ -118,4 +118,35 @@ namespace ngl
     {
         return add(shape_type::space, space.data, name, is_parser);
     }
+
+    // ngl_shape_cluster
+
+    ngl_shape_cluster::ngl_shape_cluster() : shape_cluster("ngl_shape_cluster")
+    {
+        // Adding basic grammar of ngl
+        auto left_chevron       = add(ngl::shape_element('<'));
+        auto right_chevron      = add(ngl::shape_element('>'));
+        auto left_brace         = add(ngl::shape_element('['));
+        auto right_brace        = add(ngl::shape_element(']'));
+        auto underscore         = add(ngl::shape_element('_'));
+        auto edge               = add(ngl::shape_element(':'));
+        auto left_curly_brace   = add(ngl::shape_element('{'));
+        auto right_curly_brace  = add(ngl::shape_element('}'));
+
+        auto newline            = add(ngl::shape_element('\n'));
+        auto space              = add(ngl::shape_space(' '));
+        auto tab                = add(ngl::shape_space('\t'));
+        auto whitespace         = add(ngl::shape_or(space, tab, newline));
+        auto whitespaces        = add(ngl::shape_many(whitespace));
+
+        auto minus_letter       = add(ngl::shape_range('a', 'z'));
+        auto maj_letter         = add(ngl::shape_range('A', 'Z'));
+        auto letter             = add(ngl::shape_or(minus_letter, maj_letter));
+
+        auto digit              = add(ngl::shape_range('0', '9'));
+        auto digits             = add(ngl::shape_many(digit));
+
+        auto identifier_symbol  = add(ngl::shape_or(letter, digit, underscore));
+        auto raw_identifier     = add(ngl::shape_many(identifier_symbol));
+    }
 } // ngl
