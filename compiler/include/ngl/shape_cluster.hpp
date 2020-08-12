@@ -57,6 +57,10 @@ namespace ngl
     {
     public:
         explicit ngl_shape_cluster();
+
+    private:
+        ngl::shape_data colon_;
+        ngl::shape_data raw_identifier_;
     };
 
 } // ngl

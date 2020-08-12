@@ -23,6 +23,7 @@ add_executable(exp_lexer lexer.cpp)
 exp_target(exp_lexer)
 
 exp_make(ngl_syntax)
+exp_make(parser)
 
 
 #cl /subsystem:console ucrt.lib vcruntime.lib msvcrt.lib  output.o
