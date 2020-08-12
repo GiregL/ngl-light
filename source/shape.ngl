@@ -1,4 +1,4 @@
-ngl:shape edge [:]
+ngl:shape plus [+]
 
 ngl:shape scalar_identifier
 {
@@ -14,14 +14,7 @@ ngl:shape path_identifier
     >
 }
 
-// SID (:SID)
+ngl:shape add
+{
 
-ngl : shape : test
-
-ID (EDGE ID)
-
-
-S<0> ID ngl 1
-S<1>
-    SEQ<0> : 1
-    SEQ<1> ID 1
+}
