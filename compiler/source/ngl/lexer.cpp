@@ -409,4 +409,9 @@ namespace ngl
                 } // for shape
                 */
     }
+
+    const std::vector<std::reference_wrapper<ngl::shape_cluster>>& lexer::shape_cluster()
+    {
+        return shape_clusters_;
+    }
 } // ngl

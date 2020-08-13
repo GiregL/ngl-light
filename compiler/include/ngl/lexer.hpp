@@ -49,6 +49,9 @@ namespace ngl
         std::string_view display(const ngl::shape&);
         void display();
 
+        // TODO: add right const
+        [[nodiscard]] const std::vector<std::reference_wrapper<ngl::shape_cluster>>& shape_cluster();
+
         [[nodiscard]] std::string_view data() const;
 
         [[nodiscard]] const std::vector<shape>& shapes() const;
