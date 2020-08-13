@@ -1,0 +1,20 @@
+ngl:shape plus [+]
+
+ngl:shape scalar_identifier
+{
+    raw_identifier
+}
+
+ngl:shape path_identifier
+{
+    ngc:sequence
+    <
+        ngs:scalar_identifier,
+        ngc:many< ngc:sequence< ngs:edge, ngs:scalar_identifier > >
+    >
+}
+
+ngl:shape add
+{
+
+}

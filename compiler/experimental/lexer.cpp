@@ -1,6 +1,27 @@
 #include <ngl/lexer.hpp>
 #include <ngl/shape_cluster.hpp>
 
+/*
+// sequence loop
+(A B C) (A B C)
+ex:
+ngl (: zeta) (: test)
+
+
+// partial sequence
+sequence : (A B C)
+matching (A B Z) : no match, reset the sequence
+
+// nested sequence
+test<zeta<test>>
+
+// recursive rules
+id : raw_id | param_id
+scalar_id : raw_id | param_id
+param_id : raw_id < id >
+
+ */
+
 int main()
 {
     try
@@ -15,18 +36,11 @@ int main()
         auto letters = shapes.add(ngl::shape_many(letter));
         auto digits = shapes.add(ngl::shape_many(digit));
 
-        auto s = shapes.add(ngl::shape_sequence(letter, underscore, digit));
-        // n_0 true
-        // n___0 false
-
-        //auto seq = shapes.add(ngl::shape_sequence(letter, many_underscore, digit));
-
-        //auto seq = shapes.add(ngl::shape_sequence(letter, underscore, digits));
-
         auto A = seq.add(ngl::shape_element('a'));
         auto B = seq.add(ngl::shape_element('b'));
         auto C = seq.add(ngl::shape_element('c'));
         auto zero = seq.add(ngl::shape_element('0'));
+
         seq.add(ngl::shape_sequence(A, B, C));
 
 

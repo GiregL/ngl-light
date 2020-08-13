@@ -129,14 +129,14 @@ namespace ngl
     ngl_shape_cluster::ngl_shape_cluster() : shape_cluster("ngl_shape_cluster")
     {
         // Adding basic grammar of ngl
-        auto left_chevron       = add(ngl::shape_element('<'));
-        auto right_chevron      = add(ngl::shape_element('>'));
-        auto left_brace         = add(ngl::shape_element('['));
-        auto right_brace        = add(ngl::shape_element(']'));
-        auto underscore         = add(ngl::shape_element('_'));
-        auto edge               = add(ngl::shape_element(':'));
-        auto left_curly_brace   = add(ngl::shape_element('{'));
-        auto right_curly_brace  = add(ngl::shape_element('}'));
+        auto left_chevron       = add(ngl::shape_element('<'), "left_chevron");
+        auto right_chevron      = add(ngl::shape_element('>'), "right_chevron");
+        auto left_brace         = add(ngl::shape_element('['), "left_brace");
+        auto right_brace        = add(ngl::shape_element(']'), "right_brace");
+        auto underscore         = add(ngl::shape_element('_'), "underscore");
+        colon_                  = add(ngl::shape_element(':'), "colon");
+        auto left_curly_brace   = add(ngl::shape_element('{'), "left_curly_brace");
+        auto right_curly_brace  = add(ngl::shape_element('}'), "right_curly_brace");
 
         auto newline            = add(ngl::shape_space('\n'));
         auto space              = add(ngl::shape_space(' '));
@@ -144,15 +144,39 @@ namespace ngl
         auto whitespace         = add(ngl::shape_or(space, tab, newline));
         auto whitespaces        = add(ngl::shape_many(whitespace));
 
-        auto minus_letter       = add(ngl::shape_range('a', 'z'));
-        auto maj_letter         = add(ngl::shape_range('A', 'Z'));
-        auto letter             = add(ngl::shape_or(minus_letter, maj_letter));
+        auto lower_letter       = add(ngl::shape_range('a', 'z'), "lower_letter");
+        auto upper_letter       = add(ngl::shape_range('A', 'Z'), "upper_letter");
+        auto letter             = add(ngl::shape_or(lower_letter, upper_letter), "letter");
 
-        auto digit              = add(ngl::shape_range('0', '9'));
-        auto digits             = add(ngl::shape_many(digit));
+        auto digit              = add(ngl::shape_range('0', '9'), "digit");
+        auto digits             = add(ngl::shape_many(digit), "digits");
 
-        auto identifier_symbol  = add(ngl::shape_or(letter, digit, underscore));
-        auto identifier_symbols  = add(ngl::shape_many(identifier_symbol));
-        auto raw_identifier     = add(ngl::shape_sequence(letter, identifier_symbol));
+        auto identifier_symbol  = add(ngl::shape_or(letter, digit, underscore), "identifier_symbol");
+        auto identifier_symbols = add(ngl::shape_many(identifier_symbol), "identifier_symbols");
+        raw_identifier_         = add(ngl::shape_sequence(letter, identifier_symbol), "raw_identifier");
+
+
     }
 } // ngl
+
+
+
+/*
+<description> ::= <vector_description> | <scalar_description>
+<vector_description> ::= <identifier> <space> <raw_identifier> "{" <description>* "}"
+<scalar_description> ::= <identifier> <space> <raw_identifier>
+
+<identifier> ::= <raw_identifier> | <path_identifier> | <parameterized_identifier>
+<path_identifier> ::= <scalar_identifier> (<edge> <scalar_identifier>)+
+<scalar_identifier> ::= <raw_identifier> | <parameterized_identifier>
+<parameterized_identifier> ::= <raw_identifier> "<" <identifier> (" " <identifier>)* ">"
+<raw_identifier> ::= <identifier_symbol> <identifier_symbol>*
+
+<identifier_symbol> ::= <letter> | <digit> | <underscore>
+
+<letter> ::= [a-z]
+<digit> ::= [0-9]
+<underscore> ::= "_"
+<edge> ::= ":"
+<space> ::= " "+
+ */
