@@ -6,29 +6,37 @@
 
 namespace ngl
 {
+    using token_kind = int;
+
+    /**
+     * Generic representation of a rule of parsing
+     */
+    struct parser_rule
+    {
+        virtual bool verify(/* TODO: */) = 0;
+    };
+
+    struct parser_sequence : public parser_rule
+    {
+        std::vector<token_kind> predicate;
+    };
+
+    struct parser_many : public parser_rule
+    {
+
+    };
+
     class parser
     {
     public:
-        explicit parser(ngl::lexer& lexer)
-            : lexer_{ lexer }
-        {
+        explicit parser(ngl::lexer& lexer);
 
-        }
-
-        void process(const std::string& source)
-        {
-            /*
-            lexer_.set_source(source);
-
-            while (lexer_.has_shapes())
-            {
-                auto shape = lexer_.next_shape();
-                lexer_.display(shape);
-            }*/
-        }
+        void process(const std::string& source);
 
     private:
         ngl::lexer& lexer_;
+        std::vector<parser_rule> rules_;
+        std::vector<token_kind> kinds_;
     };
 } // ngl
 
