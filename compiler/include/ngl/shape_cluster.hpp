@@ -63,6 +63,8 @@ namespace ngl
         ngl::shape_data raw_identifier_;
     };
 
+    static inline  ngl::ngl_shape_cluster intrinsic_shape_cluster{};
+
 } // ngl
 
 #endif // COMPILER_INCLUDE_NGL_SHAPE_CLUSTER_HPP_NGL

@@ -24,6 +24,7 @@ exp_target(exp_lexer)
 
 exp_make(ngl_syntax)
 exp_make(parser)
+exp_make(graph)
 
 
 #cl /subsystem:console ucrt.lib vcruntime.lib msvcrt.lib  output.o

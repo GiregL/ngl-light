@@ -1,5 +1,6 @@
 #include <ngl/cluster.hpp>
 
+#include <ngl/shape_cluster.hpp>
 #include <ngl/log.hpp>
 #include <nds/encoder/graph.hpp>
 
@@ -8,7 +9,7 @@ namespace ngl
     cluster::cluster(std::string name, std::string source)
         : name_{ std::move(name) }
         , source_{ std::move(source) }
-        , lexer_{ }
+        , lexer_{ ngl::intrinsic_shape_cluster }
         , parser_{ lexer_ }
         , root_{ nullptr }
     {
