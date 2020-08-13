@@ -137,6 +137,7 @@ namespace ngl
         colon_                  = add(ngl::shape_element(':'), "colon");
         auto left_curly_brace   = add(ngl::shape_element('{'), "left_curly_brace");
         auto right_curly_brace  = add(ngl::shape_element('}'), "right_curly_brace");
+        auto comma              = add(ngl::shape_element(','), "comma");
 
         auto newline            = add(ngl::shape_space('\n'));
         auto space              = add(ngl::shape_space(' '));
@@ -154,8 +155,6 @@ namespace ngl
         auto identifier_symbol  = add(ngl::shape_or(letter, digit, underscore), "identifier_symbol");
         auto identifier_symbols = add(ngl::shape_many(identifier_symbol), "identifier_symbols");
         raw_identifier_         = add(ngl::shape_sequence(letter, identifier_symbol), "raw_identifier");
-
-
     }
 } // ngl
 
