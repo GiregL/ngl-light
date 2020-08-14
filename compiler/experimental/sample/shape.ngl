@@ -2,7 +2,7 @@ ngl:shape plus [+]
 
 ngl:shape add
 {
-    ngc:sequence<ngl:identifier, ngl:identifier>
+    ngl:concept:sequence<ngl:shape:identifier, ngl:shape:plus, ngl:shape:identifier>
 }
 
 ngl:edge<ngl, ngl:shape:add, ngl:concept:add, conceptualisation>

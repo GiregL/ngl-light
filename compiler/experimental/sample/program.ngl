@@ -1,20 +1,20 @@
 ngl:instruction add
 {
-
+    // omitted
 }
 
 ngl:concept:function add
 {
     ngl:data <a>
     ngl:data <b>
-    .result ngl:instruction<a, b>
+    .result ngl:instruction:add<a, b>
 }
 
 ngl:concept add
 {
     ngl:data <a>
     ngl:data <b>
-    .result ngl:function<a, b>
+    .result ngl:function:add<a, b>
 }
 
 ngl:program
