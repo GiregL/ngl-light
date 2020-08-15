@@ -36,6 +36,7 @@ namespace ngl
 
         uint64_t scalar_shapes_count() const;
         uint64_t vector_shapes_count() const;
+        std::vector<uint64_t>& vector_data(unsigned int index) { return vector_datas_[index]; }
 
         uint64_t parser_index = 0;
         uint64_t parser_shape_state_ = 0;

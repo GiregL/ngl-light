@@ -27,7 +27,7 @@ namespace ngl
         shape.index = shape_data_index_++;
         shape.id = 1u << shape.index;
         shape.type = static_cast<uint64_t>(shape_type);
-        shape.data = reinterpret_cast<uint64_t>(std::addressof(vector_datas_.back()));
+        shape.data = vector_datas_.size() - 1; // index
         shape.name = name;
 
         //for (const auto& sh_id : vector_datas_.back()) shape.vector_id |= sh_id;

@@ -118,8 +118,8 @@ namespace ngl
                         break;
 
                     case shape_type::vector_sequence: {
-                        auto ar = reinterpret_cast<std::vector<uint64_t>*>(shape.data);
-                        auto sequence_size = ar->size();
+                        auto ar = shape_cluster.vector_data(shape.data);
+                        auto sequence_size = ar.size();
 
                         //shape_vector_index[];
                         std::cout << " I: " << shape.vector_index
@@ -136,10 +136,10 @@ namespace ngl
                         }
 
                         // current shape in the sequence
-                        auto shape_index = ar->operator[](shape.vector_index);
+                        auto shape_index = ar[shape.vector_index];
                         auto next_shape_index = -1;
                         // get the next shape index if it exists
-                        if (shape.vector_index + 1 < sequence_size) next_shape_index = reinterpret_cast<std::vector<uint64_t>*>(shape.data)->operator[](shape.vector_index + 1);
+                        if (shape.vector_index + 1 < sequence_size) next_shape_index = ar[shape.vector_index + 1];
 
                         bool pmatch = previous_state[shape.index];
                         bool index_match = shape_state[shape_index];
