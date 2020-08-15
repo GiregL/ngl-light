@@ -9,7 +9,7 @@ namespace ngl
     cluster::cluster(std::string name, std::string source)
         : name_{ std::move(name) }
         , source_{ std::move(source) }
-        , lexer_{ ngl::intrinsic_shape_cluster }
+        , lexer_{ ngl::ngl_shape_cluster }
         , parser_{ lexer_ }
         , root_{ nullptr }
     {

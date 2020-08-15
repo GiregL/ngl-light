@@ -32,7 +32,7 @@ namespace ngl
         using element_type = char;
 
         explicit lexer();
-        explicit lexer(ngl::shape_cluster&);
+        explicit lexer(ngl::shape_cluster);
 
         void process();
         void process(std::string_view);
@@ -49,8 +49,9 @@ namespace ngl
         std::string_view display(const ngl::shape&);
         void display();
 
-        // TODO: add right const
-        [[nodiscard]] const std::vector<std::reference_wrapper<ngl::shape_cluster>>& shape_cluster();
+        void reset();
+
+        [[nodiscard]] const std::vector<ngl::shape_cluster>& shape_cluster() const;
 
         [[nodiscard]] std::string_view data() const;
 
@@ -63,13 +64,9 @@ namespace ngl
     private:
         std::string_view data_;
         std::vector<shape> shapes_;
-        std::vector<std::reference_wrapper<ngl::shape_cluster>> shape_clusters_;
+        std::vector<ngl::shape_cluster> shape_clusters_;
 
         unsigned int parser_cursor_ = 0;
-
-        std::vector<std::pair<element_type, element_type>> element_ranges_;
-        std::vector<element_type> element_scalars_;
-        std::vector<std::string> element_vectors_;
     };
 } // ngl
 

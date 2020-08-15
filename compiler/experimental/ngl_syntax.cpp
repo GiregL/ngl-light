@@ -11,10 +11,10 @@ int main()
         ngl::lexer lx{ ngl_shape };
 
         std::string data = R"(
-ngl:shape scalar_description
-{
-    ngc:sequence<ngs:identifier ngs:identifier>
-}
+        ngl:shape scalar_description
+        {
+            ngc:sequence<ngs:identifier ngs:identifier>
+        }
 )";
 
         lx.process(data);

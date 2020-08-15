@@ -11,10 +11,10 @@ namespace ngl
     lexer::lexer()
     {}
 
-    lexer::lexer(ngl::shape_cluster& shape_cluster)
+    lexer::lexer(ngl::shape_cluster shape_cluster)
         : data_{}
     {
-        shape_clusters_.emplace_back(shape_cluster);
+        shape_clusters_.emplace_back(std::move(shape_cluster));
     }
 
     void lexer::process(std::string_view data)
@@ -26,11 +26,16 @@ namespace ngl
     // todo : use 3 registers for scalar, vector and parser states
     void lexer::process()
     {
+        reset();
+
         try
         {
             uint64_t vector_iterator = 0;
             std::bitset<64> shape_state;
             std::bitset<64> previous_state;
+            std::bitset<64> sequence_state;
+
+            bool finalized = false;
 
             uint64_t vector_state = 0;
             uint64_t pvector_state = 0;
@@ -41,7 +46,7 @@ namespace ngl
             size_t space = 0;
 
             if (shape_clusters_.empty()) ngl_error("Lexer requires at least 1 shape_cluster");
-            auto& shape_cluster = shape_clusters_[0].get();
+            auto& shape_cluster = shape_clusters_[0];
             auto& shape_data = shape_cluster.datas();
             auto scalar_shapes_count = shape_cluster.scalar_shapes_count();
 
@@ -112,20 +117,11 @@ namespace ngl
 
                         break;
 
-                        //!     # seq<_ ng _>
-                        //!    _ I: 0 IM: 1 PM: 0 NM: 0 M: 1
-                        //!        n I: 0 IM: 0 PM: 1 NM: 1 M: 0 -> if !IM && PM -> I = 1 IM = 1 M = 1
-                        //!    n I: 1 IM: 1 PM: 1 NM: 0 M: 1
-                        //!    g I: 1 IM: 1 PM: 1 NM: 0 M: 1
-                        //!        _ I: 1 IM: 0 PM: 1 NM: 1 M: 0 -> if !IM && PM -> I = 2 IM = 1 M = 1
-                        //!    _ I: 2 IM: 1 PM: 1 NM: 0 M: 1
-                        //!
-                        //!    #end1 I == LI && is_scalar<LS>               -> I = 0 VID = ~VID
-                        //!    #end2 I == LI && !is_scalar<LS> && NM == 0   -> I = 0 VID = ~VID
                     case shape_type::vector_sequence: {
                         auto ar = reinterpret_cast<std::vector<uint64_t>*>(shape.data);
                         auto sequence_size = ar->size();
 
+                        //shape_vector_index[];
                         std::cout << " I: " << shape.vector_index
                           << " M: " << match;
 
@@ -135,7 +131,8 @@ namespace ngl
                             match = false;
                             shape_state[shape.index] = false;
                             shape.vector_index = 0;
-                            break;
+                            sequence_state[shape.index] = true;
+                            //std::cout << "reset";
                         }
 
                         // current shape in the sequence
@@ -147,15 +144,6 @@ namespace ngl
                         bool pmatch = previous_state[shape.index];
                         bool index_match = shape_state[shape_index];
                         bool next_match = (next_shape_index != -1) && shape_state[next_shape_index];
-
-                        //std::cout << " NM: " << next_match;
-
-                        if (shape.vector_index <= sequence_size && !next_match)
-                        {
-                            //shape.vector_index = 0;
-
-                        }
-
 
                         // next shape in the sequence
                         if (index_match)
@@ -190,8 +178,9 @@ namespace ngl
                 //std::cout << "\n" << std::bitset<32>{ vector_state } << " " << std::bitset<24>{ vector_state & ~parser_state };
 
 
-                std::cout << " | " << std::bitset<32>{ shape_state.to_ullong() };
-                std::cout << " | " << std::bitset<32>{ vector_state };
+                std::cout << " | " << std::bitset<24>{ shape_state.to_ullong() };
+                std::cout << " | " << std::bitset<24>{ vector_state };
+                std::cout << " | " << std::bitset<24>{ sequence_state.to_ullong() };
 
                 //std::cout << " | " << std::bitset<32>{ parser_state & shape_state.to_ullong() };
 
@@ -216,13 +205,25 @@ namespace ngl
                 }*/
 
 
+                // sequence finalisation
+                if ((sequence_state.to_ullong()))
+                {
+                    add_shape(vector_state, std::to_string(pvector_state), { i - vector_iterator - space, vector_iterator });
+                    vector_iterator = 0;
+                    sequence_state = 0;
+                    space = 0;
+                    finalized = true;
+                }
+
                 // vector finalisation
                 if ((vector_state & pvector_state) == 0 && i != 0)
                 {
                     //std::cout << "__" << (i - vector_iterator - space) << "__" << vector_iterator;
                     add_shape(vector_state, std::to_string(pvector_state), { i - vector_iterator - space, vector_iterator });
                     vector_iterator = 0;
+                    sequence_state = 0;
                     space = 0;
+                    finalized = true;
 
                     //std::cout << " | " << std::bitset<32>{ parser_state & shape_state.to_ullong() };
                 }
@@ -410,8 +411,12 @@ namespace ngl
                 */
     }
 
-    const std::vector<std::reference_wrapper<ngl::shape_cluster>>& lexer::shape_cluster()
+    const std::vector<ngl::shape_cluster>& lexer::shape_cluster() const
     {
         return shape_clusters_;
+    }
+    void lexer::reset()
+    {
+
     }
 } // ngl

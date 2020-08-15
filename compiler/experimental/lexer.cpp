@@ -26,6 +26,18 @@ int main()
 {
     try
     {
+                ngl::shape_cluster cpp;
+        {
+            auto letter = cpp.add(ngl::shape_range('a', 'z'));
+            auto letters = cpp.add(ngl::shape_many(letter));
+            auto S = cpp.add(ngl::shape_element('s'));
+            auto T = cpp.add(ngl::shape_element('t'));
+            auto R = cpp.add(ngl::shape_element('r'));
+            auto U = cpp.add(ngl::shape_element('u'));
+            auto C = cpp.add(ngl::shape_element('c'));
+            cpp.add(ngl::shape_sequence(S, T, R, U, C, T));
+        }
+
         ngl::shape_cluster seq;
         ngl::shape_cluster shapes;
         auto letter = shapes.add(ngl::shape_range('a', 'z'));
@@ -40,17 +52,29 @@ int main()
         auto B = seq.add(ngl::shape_element('b'));
         auto C = seq.add(ngl::shape_element('c'));
         auto zero = seq.add(ngl::shape_element('0'));
+        auto us = seq.add(ngl::shape_element('_'));
 
         seq.add(ngl::shape_sequence(A, B, C));
+        seq.add(ngl::shape_sequence(A, B, zero));
+
+            ngl::shape_cluster test;
+            {
+                auto l = test.add(ngl::shape_range('a', 'z'));
+                auto d = test.add(ngl::shape_range('0', '9'));
+                auto u = test.add(ngl::shape_element('_'));
+                test.add(ngl::shape_sequence(l, u, d));
+            }
 
 
-        ngl::lexer lx{ seq };
+        ngl::lexer lx{ test };
+        test.display();
 
-        //std::string data = "n__0n_000"; // n_0, n_0 // circular
-        //std::string data = "n__nn"; // n, _, _
-        //std::string data = "n_0az_n_0az";
-        std::string data = "ab0";
-        // n_0 az _ n_0 az
+        //std::string data = "n_0n_0"; // n_0, n_0 // circular
+
+        // seq<abc>
+        // seq<ab0>
+        // ab_ : unfinished sequence : reset
+        std::string data = "n_0n_0n_0";
 
         /*
         seq< "abcd", "0">
@@ -72,7 +96,6 @@ int main()
         abcd*/
 
 
-        shapes.display();
         lx.process(data);
 
 
@@ -90,19 +113,6 @@ int main()
 
     return 0;
 }
-
-
-/*
-identifier: (letter | cap_letter) id_symbol* ^[a-zA-Z_][a-zA-Z0-9_\-?']*
-operator: ^(\+|\-|\*|/|<=|>=|!=|<|>|@=|@|=|\^)
-capture: ^&[a-zA-Z_][a-zA-Z0-9_\-?']*
-getfield: ^\.[a-zA-Z_][a-zA-Z0-9_\-?']*
-skip: ^[\s]+
-comment: # any
-shorthand: ^[']
- */
-
-
 
 /*
     I: index

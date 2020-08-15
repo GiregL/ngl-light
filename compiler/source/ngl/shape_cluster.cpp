@@ -20,14 +20,14 @@ namespace ngl
 
     ngl::shape_data shape_cluster::add(ngl::shape_type shape_type, std::vector<uint64_t> data, const std::string& name, bool is_parser)
     {
-        vector_datas_.push_back(std::make_unique<std::vector<uint64_t>>(std::move(data)));
+        vector_datas_.emplace_back(std::move(data));
 
         ngl::shape_data shape;
 
         shape.index = shape_data_index_++;
         shape.id = 1u << shape.index;
         shape.type = static_cast<uint64_t>(shape_type);
-        shape.data = reinterpret_cast<uint64_t>(std::addressof(*(vector_datas_.back())));
+        shape.data = reinterpret_cast<uint64_t>(std::addressof(vector_datas_.back()));
         shape.name = name;
 
         //for (const auto& sh_id : vector_datas_.back()) shape.vector_id |= sh_id;
@@ -122,39 +122,6 @@ namespace ngl
     bool shape_cluster::is_scalar(uint64_t shape_index) const
     {
         return shape_index < scalar_shapes_count();
-    }
-
-    // ngl_shape_cluster
-
-    ngl_shape_cluster::ngl_shape_cluster() : shape_cluster("ngl_shape_cluster")
-    {
-        // Adding basic grammar of ngl
-        auto left_chevron       = add(ngl::shape_element('<'), "left_chevron");
-        auto right_chevron      = add(ngl::shape_element('>'), "right_chevron");
-        auto left_brace         = add(ngl::shape_element('['), "left_brace");
-        auto right_brace        = add(ngl::shape_element(']'), "right_brace");
-        auto underscore         = add(ngl::shape_element('_'), "underscore");
-        colon_                  = add(ngl::shape_element(':'), "colon");
-        auto left_curly_brace   = add(ngl::shape_element('{'), "left_curly_brace");
-        auto right_curly_brace  = add(ngl::shape_element('}'), "right_curly_brace");
-        auto comma              = add(ngl::shape_element(','), "comma");
-
-        auto newline            = add(ngl::shape_space('\n'));
-        auto space              = add(ngl::shape_space(' '));
-        auto tab                = add(ngl::shape_space('\t'));
-        auto whitespace         = add(ngl::shape_or(space, tab, newline));
-        auto whitespaces        = add(ngl::shape_many(whitespace));
-
-        auto lower_letter       = add(ngl::shape_range('a', 'z'), "lower_letter");
-        auto upper_letter       = add(ngl::shape_range('A', 'Z'), "upper_letter");
-        auto letter             = add(ngl::shape_or(lower_letter, upper_letter), "letter");
-
-        auto digit              = add(ngl::shape_range('0', '9'), "digit");
-        auto digits             = add(ngl::shape_many(digit), "digits");
-
-        auto identifier_symbol  = add(ngl::shape_or(letter, digit, underscore), "identifier_symbol");
-        auto identifier_symbols = add(ngl::shape_many(identifier_symbol), "identifier_symbols");
-        raw_identifier_         = add(ngl::shape_sequence(letter, identifier_symbol), "raw_identifier");
     }
 } // ngl
 

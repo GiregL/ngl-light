@@ -15,9 +15,6 @@ namespace ngl
         explicit shape_cluster(std::string name = "shape_cluster")
             : name_{ std::move(name) } {}
 
-        shape_cluster(const shape_cluster&) = delete;
-        shape_cluster(shape_cluster&&) = default;
-
         [[nodiscard]] const std::string& name() const;
         [[nodiscard]] std::vector<ngl::shape_data>& datas();
         void display() const;
@@ -46,25 +43,43 @@ namespace ngl
     private:
         std::string name_;
         std::vector<ngl::shape_data> shape_datas_;
-        std::vector<std::unique_ptr<std::vector<uint64_t>>> vector_datas_;
+        std::vector<std::vector<uint64_t>> vector_datas_;
         uint64_t scalar_shapes_ = 0;
         uint64_t vector_shapes_ = 0;
         uint64_t shape_data_index_ = 0;
     };
 
 
-    class ngl_shape_cluster : public shape_cluster
+    namespace
     {
-    public:
-        explicit ngl_shape_cluster();
+        ngl::shape_cluster ngl_shape_cluster{ "ngl" };
+        auto left_chevron       = ngl_shape_cluster.add(ngl::shape_element('<'), "left_chevron");
+        auto right_chevron      = ngl_shape_cluster.add(ngl::shape_element('>'), "right_chevron");
+        auto left_brace         = ngl_shape_cluster.add(ngl::shape_element('['), "left_brace");
+        auto right_brace        = ngl_shape_cluster.add(ngl::shape_element(']'), "right_brace");
+        auto underscore         = ngl_shape_cluster.add(ngl::shape_element('_'), "underscore");
+        auto colon                  = ngl_shape_cluster.add(ngl::shape_element(':'), "colon");
+        auto left_curly_brace   = ngl_shape_cluster.add(ngl::shape_element('{'), "left_curly_brace");
+        auto right_curly_brace  = ngl_shape_cluster.add(ngl::shape_element('}'), "right_curly_brace");
+        auto comma              = ngl_shape_cluster.add(ngl::shape_element(','), "comma");
 
-    private:
-        ngl::shape_data colon_;
-        ngl::shape_data raw_identifier_;
-    };
+        auto newline            = ngl_shape_cluster.add(ngl::shape_space('\n'));
+        auto space              = ngl_shape_cluster.add(ngl::shape_space(' '));
+        auto tab                = ngl_shape_cluster.add(ngl::shape_space('\t'));
+        auto whitespace         = ngl_shape_cluster.add(ngl::shape_or(space, tab, newline));
+        auto whitespaces        = ngl_shape_cluster.add(ngl::shape_many(whitespace));
 
-    static inline  ngl::ngl_shape_cluster intrinsic_shape_cluster{};
+        auto lower_letter       = ngl_shape_cluster.add(ngl::shape_range('a', 'z'), "lower_letter");
+        auto upper_letter       = ngl_shape_cluster.add(ngl::shape_range('A', 'Z'), "upper_letter");
+        auto letter             = ngl_shape_cluster.add(ngl::shape_or(lower_letter, upper_letter), "letter");
 
+        auto digit              = ngl_shape_cluster.add(ngl::shape_range('0', '9'), "digit");
+        auto digits             = ngl_shape_cluster.add(ngl::shape_many(digit), "digits");
+
+        auto identifier_symbol  = ngl_shape_cluster.add(ngl::shape_or(letter, digit, underscore), "identifier_symbol");
+        auto identifier_symbols = ngl_shape_cluster.add(ngl::shape_many(identifier_symbol), "identifier_symbols");
+        auto raw_identifier     = ngl_shape_cluster.add(ngl::shape_sequence(letter, identifier_symbol), "raw_identifier");
+    }
 } // ngl
 
 #endif // COMPILER_INCLUDE_NGL_SHAPE_CLUSTER_HPP_NGL
