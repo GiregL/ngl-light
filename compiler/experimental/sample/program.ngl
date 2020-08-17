@@ -3,6 +3,11 @@ ngl:instruction add
     // omitted
 }
 
+ngl:concept function
+{
+    // ...
+}
+
 ngl:concept:function add
 {
     ngl:data <a>
