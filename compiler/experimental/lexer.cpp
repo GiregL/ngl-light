@@ -26,7 +26,7 @@ int main()
 {
     try
     {
-                ngl::shape_cluster cpp;
+        ngl::shape_cluster cpp;
         {
             auto letter = cpp.add(ngl::shape_range('a', 'z'));
             auto letters = cpp.add(ngl::shape_many(letter));
@@ -54,27 +54,13 @@ int main()
         auto zero = seq.add(ngl::shape_element('0'));
         auto us = seq.add(ngl::shape_element('_'));
 
-        seq.add(ngl::shape_sequence(A, B, C));
-        seq.add(ngl::shape_sequence(A, B, zero));
+        auto abc = seq.add(ngl::shape_sequence(A, B, C));
+        seq.add(ngl::shape_sequence(zero, abc, zero));
 
-            ngl::shape_cluster test;
-            {
-                auto l = test.add(ngl::shape_range('a', 'z'));
-                auto d = test.add(ngl::shape_range('0', '9'));
-                auto u = test.add(ngl::shape_element('_'));
-                test.add(ngl::shape_sequence(l, u, d));
-            }
+        ngl::lexer lx{ seq };
+        seq.display();
 
-
-        ngl::lexer lx{ test };
-        test.display();
-
-        //std::string data = "n_0n_0"; // n_0, n_0 // circular
-
-        // seq<abc>
-        // seq<ab0>
-        // ab_ : unfinished sequence : reset
-        std::string data = "n_0n_0n_0";
+        std::string data = "0abc0_";
 
         /*
         seq< "abcd", "0">

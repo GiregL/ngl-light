@@ -9,7 +9,7 @@ TEST(lexer, scalar_range)
     ngl::shape_cluster shapes;
     auto letter = shapes.add(ngl::shape_range('a', 'z'));
     auto digit = shapes.add(ngl::shape_range('0', '9'));
-    shapes.add(ngl::shape_or(letter, digit));
+    //shapes.add(ngl::shape_or(letter, digit));
 
     ngl::lexer lx{ shapes };
 
@@ -72,6 +72,7 @@ TEST(lexer, vector_sequence_scalar)
     auto underscore = shapes.add(ngl::shape_element('_'));
 
     auto seq = shapes.add(ngl::shape_sequence(letter, underscore, digit));
+    auto circular = shapes.add(ngl::shape_sequence(letter, underscore, letter));
 
     {
         ngl::lexer lx{ shapes };
@@ -85,6 +86,13 @@ TEST(lexer, vector_sequence_scalar)
         std::string data{ "n_0n_0" };
         lx.process(data);
         LX_EXPECT("n_0", "n_0");
+    }
+    // circular
+    {
+        ngl::lexer lx{ shapes };
+        std::string data{ "n_nn_n" };
+        lx.process(data);
+        LX_EXPECT("n_n", "n_n");
     }
 
     // partial sequence false

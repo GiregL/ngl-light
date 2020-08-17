@@ -35,7 +35,9 @@ namespace ngl
             std::bitset<64> previous_state;
             std::bitset<64> sequence_state;
 
-            bool finalized = false;
+            bool finalize = false;
+
+            uint64_t match_state = 0;
 
             uint64_t vector_state = 0;
             uint64_t pvector_state = 0;
@@ -50,9 +52,7 @@ namespace ngl
             auto& shape_data = shape_cluster.datas();
             auto scalar_shapes_count = shape_cluster.scalar_shapes_count();
 
-            uint64_t parser_state = shape_cluster.parser_shape_state_;
-
-            std::cout << "\n" << std::bitset<32>(shape_cluster.parser_shape_state_) << "\n";
+            uint64_t fragment_state = shape_cluster.fragment_state();
 
 
             for (i = 0; i < data_.size(); ++i)
@@ -122,7 +122,7 @@ namespace ngl
                         auto sequence_size = ar.size();
 
                         //shape_vector_index[];
-                        std::cout << " I: " << shape.vector_index
+                        std::cout << shape.index << " I: " << shape.vector_index
                           << " M: " << match;
 
                         // end of sequence
@@ -133,6 +133,10 @@ namespace ngl
                             shape.vector_index = 0;
                             sequence_state[shape.index] = true;
                             //std::cout << "reset";
+                            for (auto s : shape_data)
+                            {
+                                if (s.type == (uint64_t) ngl::shape_type::vector_sequence) shape.vector_index = 0;
+                            }
                         }
 
                         // current shape in the sequence
@@ -156,7 +160,7 @@ namespace ngl
                         shape_state[shape.index] = match;
 
                         if (match) vector_state |= shape.vector_id;
-                        //else shape.vector_index = 0;
+                        else shape.vector_index = 0;
 
                         break;
                     }
@@ -177,13 +181,14 @@ namespace ngl
                 //vector_state = vector_state & ~parser_state;
                 //std::cout << "\n" << std::bitset<32>{ vector_state } << " " << std::bitset<24>{ vector_state & ~parser_state };
 
+                match_state = shape_state.to_ullong() & ~fragment_state;
 
-                std::cout << " | " << std::bitset<24>{ shape_state.to_ullong() };
-                std::cout << " | " << std::bitset<24>{ vector_state };
-                std::cout << " | " << std::bitset<24>{ sequence_state.to_ullong() };
+                std::cout << " | S" << std::bitset<24>{ shape_state.to_ullong() };
+                std::cout << " | V" << std::bitset<24>{ vector_state };
+                std::cout << " | Q" << std::bitset<24>{ sequence_state.to_ullong() };
+                std::cout << " | M" << std::bitset<24>{ match_state };
 
                 //std::cout << " | " << std::bitset<32>{ parser_state & shape_state.to_ullong() };
-
                 //std::cout << debug;
 
                 if (shape_state.to_ullong() == 0)
@@ -195,37 +200,30 @@ namespace ngl
                 // analyse mode
                 // check if vector_state has single bit when previous_vector_state != vector_state // bool has_single_bit = (-v ^ v) <  -v;
 
-                // scalar finalisation
-                /*
-                if ((previous_state.to_ullong() & vector_state_mask.to_ullong()) == 0)
-                {
-                    add_shape(std::to_string(previous_state.to_ullong()), { i - 1 - space, 1 });
-                    vector_iterator = 0;
-                    space = 0;
-                }*/
 
+                // scalar finalization
+                finalize = (-match_state ^ match_state) <  -match_state && shape_cluster.is_scalar(match_state);
+                // vector finalization
+                finalize |= (shape_state.to_ullong() & previous_state.to_ullong()) == 0;
+                //
+                finalize |= sequence_state.to_ullong();
 
-                // sequence finalisation
-                if ((sequence_state.to_ullong()))
+                if (i == 0) finalize = false;
+
+                // finalization
+                if (finalize)
                 {
+                    if (!match_state)
+                    {
+                        ngl_error("finalize error");
+                        throw std::logic_error("lexer error : shape is a fragment");
+                    }
+
                     add_shape(vector_state, std::to_string(pvector_state), { i - vector_iterator - space, vector_iterator });
                     vector_iterator = 0;
                     sequence_state = 0;
                     space = 0;
-                    finalized = true;
-                }
-
-                // vector finalisation
-                if ((vector_state & pvector_state) == 0 && i != 0)
-                {
-                    //std::cout << "__" << (i - vector_iterator - space) << "__" << vector_iterator;
-                    add_shape(vector_state, std::to_string(pvector_state), { i - vector_iterator - space, vector_iterator });
-                    vector_iterator = 0;
-                    sequence_state = 0;
-                    space = 0;
-                    finalized = true;
-
-                    //std::cout << " | " << std::bitset<32>{ parser_state & shape_state.to_ullong() };
+                    finalize = false;
                 }
 
                 previous_state = shape_state;

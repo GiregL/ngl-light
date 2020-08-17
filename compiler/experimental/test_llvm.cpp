@@ -39,23 +39,43 @@ int main()
     std::unique_ptr<Module> MainModule = std::make_unique<Module>("MainModule", GlobalContext);
     std::unordered_map<std::string, Value*> NamedValues;
 
+    std::vector<Type*> PutCharArgs = { Type::getInt32Ty(Context) };
+    FunctionType* PutCharType = FunctionType::get(Type::getInt32Ty(Context), PutCharArgs, false);
+    Function::Create(PutCharType, Function::ExternalLinkage, "putchar", M);
 
-    // Main Function
-    FunctionType* FT = FunctionType::get(Type::getInt32Ty(GlobalContext), false);
-    Function* F = Function::Create(FT, Function::ExternalLinkage, "main", MainModule.get());
-    BasicBlock* BB = BasicBlock::Create(GlobalContext, "EntryBlock", F);
-    Value* three = ConstantInt::get(Type::getInt32Ty(GlobalContext), 3);
-    Value* four = ConstantInt::get(Type::getInt32Ty(GlobalContext), 4);
-    Instruction* add = BinaryOperator::CreateAdd(three, four, "tmpAdd", BB);
 
-    // Code Generation
-    IRBuilder<> Builder {GlobalContext};
+
+
+
+    // Create the main function: first create the type 'int ()'
+    FunctionType* FT = FunctionType::get(Type::getInt32Ty(Context), /*not vararg*/ false);
+
+    // By passing a module as the last parameter to the Function constructor,
+    // it automatically gets appended to the Module.
+    Function* F = Function::Create(FT, Function::ExternalLinkage, "main", M);
+
+    // Add a basic block to the function... again, it automatically inserts
+    // because of the last argument.
+    BasicBlock* BB = BasicBlock::Create(Context, "EntryBlock", F);
+    Value* Two = ConstantInt::get(Type::getInt32Ty(Context), 2);
+    Value* Three = ConstantInt::get(Type::getInt32Ty(Context), 3);
+    Instruction* Add = BinaryOperator::Create(Instruction::Add, Two, Three, "addresult");
+    BB->getInstList().push_back(Add);
+
+
+
+
+    IRBuilder<> Builder(Context);
     Builder.SetInsertPoint(BB);
 
+    auto putchar = M->getFunction("putchar");
 
-    Function* putChar = MainModule->getFunction("putchar");
-    Value* addRes = NamedValues["tmpAdd"];
-    Builder.CreateCall(putChar, {addRes});
+    Value* display = ConstantInt::get(Type::getInt32Ty(Context), 97);
+    Builder.CreateCall(putchar, {display});
+
+
+    // Create the return instruction and add it to the basic block
+    BB->getInstList().push_back(ReturnInst::Create(Context, Three));
 
     LLVMInitializeX86Target();
     LLVMInitializeX86AsmParser();

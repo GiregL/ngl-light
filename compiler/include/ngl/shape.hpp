@@ -21,6 +21,12 @@ namespace ngl
         , vector_sequence
     };
 
+    enum class shape_property : uint8_t
+    {
+        fragment = 1,
+        capture = 2
+    };
+
     struct shape_data
     {
         uint64_t index = 0; // 0-63
@@ -31,8 +37,7 @@ namespace ngl
         uint64_t vector_size = 0;
         uint64_t vector_index = 0;
         uint64_t vector_id = 0;
-        bool capture = false;
-        bool is_parser = false;
+        uint64_t is_fragment = 0;
     };
 
     struct shape_element
