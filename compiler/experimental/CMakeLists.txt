@@ -19,7 +19,7 @@ endfunction()
 
 #exp_make(lexer lexer.cpp)
 
-add_executable(exp_lexer lexer.cpp)
+add_executable(exp_lexer test_llvm.cpp)
 exp_target(exp_lexer)
 
 exp_make(ngl_syntax)
