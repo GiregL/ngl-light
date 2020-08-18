@@ -30,10 +30,10 @@ int main()
     auto id2 = g.add("id_2"s, ngs_add);
 
 
-    g.connect(ngc_add, ngi_add);
+    g.add_arc(ngc_add, ngi_add);
 
-    g.connect(ngs_add, ngc_add);
-    g.connect(ngc_add, ngs_add);
+    g.add_arc(ngs_add, ngc_add);
+    g.add_arc(ngc_add, ngs_add);
 
 
 

@@ -11,7 +11,7 @@ namespace ngl
         , source_{ std::move(source) }
         , lexer_{ ngl::ngl_shape_cluster }
         , parser_{ lexer_ }
-        , root_{ nullptr }
+        , root_{}
     {
         root_ = graph_.add(name_);
         node_ = root_;
@@ -29,14 +29,14 @@ namespace ngl
     }
 
 
-    nds::node_ptr<std::string> cluster::root()
+    ngl::node_ptr<std::string> cluster::root()
     {
         return root_;
     }
 
 
 
-    nds::node_ptr<std::string> cluster::node()
+    ngl::node_ptr<std::string> cluster::node()
     {
         return node_;
     }

@@ -16,8 +16,8 @@ namespace ngl
         void process();
 
         ngl::graph& graph();
-        nds::node_ptr<std::string> root();
-        nds::node_ptr<std::string> node();
+        ngl::node_ptr<std::string> root();
+        ngl::node_ptr<std::string> node();
 
     private:
         std::string name_;
@@ -25,8 +25,8 @@ namespace ngl
         ngl::lexer lexer_;
         ngl::parser parser_;
         ngl::graph graph_;
-        nds::node_ptr<std::string> root_;
-        nds::node_ptr<std::string> node_;
+        ngl::node_ptr<std::string> root_;
+        ngl::node_ptr<std::string> node_;
     };
 } // ngl
 
