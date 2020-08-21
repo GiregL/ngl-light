@@ -121,46 +121,84 @@ namespace ngl
                         auto ar = shape_cluster.vector_data(shape.data);
                         auto sequence_size = ar.size();
 
+                        seq_match:
+
                         //shape_vector_index[];
-                        std::cout << shape.index << " I: " << shape.vector_index
-                          << " M: " << match;
+                        //std::cout << " I: " << shape.vector_index;
 
                         // end of sequence
-                        if (shape.vector_index == sequence_size)
+                        if (shape.vector_index == ~uint64_t(0))
                         {
+                            shape.vector_index = 0;
                             match = false;
                             shape_state[shape.index] = false;
-                            shape.vector_index = 0;
                             sequence_state[shape.index] = true;
                             //std::cout << "reset";
                             for (auto s : shape_data)
                             {
-                                if (s.type == (uint64_t) ngl::shape_type::vector_sequence) shape.vector_index = 0;
+                                //if (s.type == (uint64_t) ngl::shape_type::vector_sequence) shape.vector_index = 0;
                             }
                         }
 
+
+
                         // current shape in the sequence
                         auto shape_index = ar[shape.vector_index];
-                        auto next_shape_index = -1;
-                        // get the next shape index if it exists
-                        if (shape.vector_index + 1 < sequence_size) next_shape_index = ar[shape.vector_index + 1];
+                        auto shape_id = uint64_t(1) << shape_index;
+                        auto shape_scalar = shape_cluster.is_scalar(shape_id);
 
-                        bool pmatch = previous_state[shape.index];
+
                         bool index_match = shape_state[shape_index];
-                        bool next_match = (next_shape_index != -1) && shape_state[next_shape_index];
 
-                        // next shape in the sequence
-                        if (index_match)
+                        // scalar current shape
+                        // if matching shape is scalar, go to the next shape index in the sequence
+                        if (shape_cluster.is_scalar(shape_index))
                         {
-                            // if matching shape is scalar, go to the next shape index in the sequence
-                            if (shape_cluster.is_scalar(shape_index)) shape.vector_index++;
+                            if (index_match)
+                            {
+                                shape.vector_index++;
+                                // sequence end, finalise next iteration
+                                if (shape.vector_index == sequence_size) shape.vector_index = ~uint64_t(0);
+                            }
                         }
+                        // vector current shape
+                        else
+                        {
+                            // current index doesn t match
+                            if (!index_match)
+                            {
+                                shape.vector_index++;
+                                if (shape.vector_index == sequence_size)
+                                {
+                                    //std::cout << "RESET";
+                                    shape.vector_index = ~uint64_t(0);
+                                    goto seq_match;
+                                }
+                                else
+                                {
+                                    shape_index = ar[shape.vector_index];
+                                    index_match = shape_state[shape_index];
+
+                                    if (shape_cluster.is_scalar(ar[shape.vector_index]))
+                                    {
+                                        shape.vector_index = ~uint64_t(0);
+                                    }
+                                    else if (!index_match)
+                                    {
+                                        shape.vector_index = ~uint64_t(0);
+                                    }
+                                }
+                            }
+                        }
+
 
                         match = index_match;
                         shape_state[shape.index] = match;
 
                         if (match) vector_state |= shape.vector_id;
                         else shape.vector_index = 0;
+
+                        //std::cout << " M: " << match;
 
                         break;
                     }
@@ -191,20 +229,27 @@ namespace ngl
                 //std::cout << " | " << std::bitset<32>{ parser_state & shape_state.to_ullong() };
                 //std::cout << debug;
 
+                if (!match_state)
+                {
+                    std::cout << "\n";
+                    ngl_error("unexpected element: {}", element);
+                    throw std::logic_error("lexer error : shape is a fragment");
+                }
+/*
                 if (shape_state.to_ullong() == 0)
                 {
                     ngl_error("unexpected element: {}", element);
                     break;
-                }
+                }*/
 
                 // analyse mode
                 // check if vector_state has single bit when previous_vector_state != vector_state // bool has_single_bit = (-v ^ v) <  -v;
 
 
                 // scalar finalization
-                finalize = (-match_state ^ match_state) <  -match_state && shape_cluster.is_scalar(match_state);
+                finalize = (-match_state ^ match_state) < -match_state && shape_cluster.is_scalar(match_state);
                 // vector finalization
-                finalize |= (shape_state.to_ullong() & previous_state.to_ullong()) == 0;
+                finalize |= (vector_state & pvector_state) == 0;
                 //
                 finalize |= sequence_state.to_ullong();
 
@@ -213,12 +258,6 @@ namespace ngl
                 // finalization
                 if (finalize)
                 {
-                    if (!match_state)
-                    {
-                        ngl_error("finalize error");
-                        throw std::logic_error("lexer error : shape is a fragment");
-                    }
-
                     add_shape(vector_state, std::to_string(pvector_state), { i - vector_iterator - space, vector_iterator });
                     vector_iterator = 0;
                     sequence_state = 0;

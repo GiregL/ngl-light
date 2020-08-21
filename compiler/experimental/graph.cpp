@@ -35,8 +35,6 @@ int main()
     g.add_arc(ngs_add, ngc_add);
     g.add_arc(ngc_add, ngs_add);
 
-
-
     cluster.process();
 
     nds::encoders::dot<>::encode<nds::console>(cluster.graph());
